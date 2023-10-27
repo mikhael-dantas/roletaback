@@ -1,0 +1,2 @@
+const zeroTriggersString = ['21', '4', '19', '15', '32', '0', '26', '3', '35', '12', '28', '21x', '4x', '19x', '15x', '32x', '0x', '26x', '3x', '35x', '12x', '28x'];
+module.exports = zeroTriggersString;
