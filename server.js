@@ -1,7 +1,7 @@
 const express = require("express");
 const app = express();
 require("dotenv").config();
-const port = process.env.PORT_SERVE_NODE;
+const port = process.env.PORT;
 const cors = require("cors");
 const consign = require("consign");
 const Game7x0b = require("./models/game7x0b");

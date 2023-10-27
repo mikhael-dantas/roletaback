@@ -34,24 +34,27 @@ module.exports = async (app) => {
 
     app.post("/api/login", async (req, res) => {
         try {
-
-            let user = await Users.findOne({
+            const user = await Users.findOne({
                 where: {
                     email: req.body.email
                 }
             });
-
-            if (bcrypt.compareSync(req.body.password, user.password)) {
-
-
-                return res.json({ isLogged: true, user: user })
+    
+            if (user) {
+                if (bcrypt.compareSync(req.body.password, user.password)) {
+                    return res.json({ isLogged: true, user: user });
+                } else {
+                    return res.json({ isLogged: false, reason: "Senha inválida" });
+                }
             } else {
-                return res.json({ isLogged: false, reason: "user or password invalid" })
+                return res.error({ isLogged: false, reason: "Usuário não encontrado" });
             }
         } catch (error) {
-            return res.json({ isLogged: false, reason: "error in database" })
+            console.error("Erro no banco de dados:", error);
+            return res.status(500).json({ isLogged: false, reason: "Erro no banco de dados" });
         }
     });
+    
 
     app.post("/api/user/create", async (req, res) => {
 
