@@ -12,7 +12,7 @@ var moment = require("moment");
 const Roulette = require("./classes/roulette");
 const zeroTriggers = require("./const/zeroTriggers");
 const voisnsTriggers = require("./const/voisns");
-
+const { Op } = require("sequelize");
 const http = require("http");
 const server = http.createServer(app);
 const { Server } = require("socket.io");
@@ -47,7 +47,7 @@ database.query("DELETE FROM game7x0b WHERE number!=''", {
 io.on("connection", (socket) => {
 	Socketio.setIo(io, socket.id);
 
-	console.log("Socketio Iniciado");
+	console.log(`Socketio Iniciado para o jogador`);
 	
 	socket.on("room", function (room) {
 		console.log(room);
@@ -55,11 +55,25 @@ io.on("connection", (socket) => {
 	});
 
 	socket.on("numbers", async (e) => {
+		if (!e[2]) { return }
 		console.log("numbers teste")
 		console.log("e: ", e)
-		let roulette = new Roulette();
+		let roulette = new Roulette(Number(e[2]))
+		jogador = Number(e[2]);
 
 		let nomeRoletta = e[1];
+
+		// keep only the 500 most recent records and delete the rest
+		Game7x0b.destroy({
+			where: {
+				id: {
+					[Op.lt]: 500,
+				},
+				jogador: {
+					[Op.eq]: jogador,
+				},
+			},
+		});
 
 		if (!nomesRoletas.light.includes(nomeRoletta)) {
 			if (e[0].length === 0) {
@@ -74,7 +88,16 @@ io.on("connection", (socket) => {
 
 				await database.sync();
 
-				let historicoRoleta = await Config_users.findByPk(1);
+				
+					let [historicoRoleta, created] = await Config_users.findOrCreate({
+						where: {
+							jogador: Number(e[2]),
+						},
+						defaults: {
+							ultimo_registro: 0,
+							ultimo_length: 0,
+						},
+					});
 
 				historicoRoleta.ultimo_registro = Number(ultimoRegistro);
 				await historicoRoleta.save();
@@ -136,8 +159,8 @@ io.on("connection", (socket) => {
 									vizinhosPagos: vizinhosPagos,
 									historyPayNumbers: historyPayNumbers,
 									voisnsPagos: voisnsPagos,
-									xxxextreme: xxxextreme,
-								});
+									xxxextreme: xxxextreme, 
+								}, e[2]);
 
 								await roulette.getPayTrigger(arrayRequisicao[arrayRequisicao.length - 1], io);
 							} else {
@@ -149,7 +172,7 @@ io.on("connection", (socket) => {
 										newtrigger: "aguardando...",
 										alltrigger: arrayBanco,
 										nomeRoletta: nomeRoletta,
-									});
+									}, e[2]);
 								} else {
 									await roulette.resetarRoleta();
 								}
@@ -184,7 +207,15 @@ io.on("connection", (socket) => {
 				let infoBanco = await roulette.retornarInfoBanco();
 				ultimoRegistro = await roulette.retornarUltimoRegistro();
 
-				let historicoRoleta = await Config_users.findByPk(1);
+				let [historicoRoleta, created] = await Config_users.findOrCreate({
+					where: {
+						jogador: Number(e[2]),
+					},
+					defaults: {
+						ultimo_registro: 0,
+						ultimo_length: 0,
+					},
+				});
 
 				historicoRoleta.ultimo_registro = Number(ultimoRegistro);
 				await historicoRoleta.save();
@@ -257,7 +288,7 @@ io.on("connection", (socket) => {
 									historyPayNumbers: historyPayNumbers,
 									voisnsPagos: voisnsPagos,
 									xxxextreme: xxxextreme,
-								});
+								}, e[2]);
 
 								await roulette.getPayTriggerString(
 									arrayRequisicao[arrayRequisicao.length - 1],
@@ -277,7 +308,7 @@ io.on("connection", (socket) => {
 										newtrigger: "aguardando...",
 										alltrigger: arrayBanco,
 										nomeRoletta: nomeRoletta,
-									});
+									}, e[2]);
 								} else {
 									await roulette.resetarRoleta();
 								}
@@ -305,10 +336,10 @@ io.on("connection", (socket) => {
 	});
 
 	socket.on("disconnect", async () => {
-		await database.query("DELETE FROM game7x0b WHERE number!=''", {
-			type: QueryTypes.DELETE,
-		});
-		console.log("User disconnect");
+		console.log(`jogador desconeectado`);
+		// await database.query(`DELETE FROM game7x0b WHERE number!='' AND jogador=${jogador}`, {
+		// 	type: QueryTypes.DELETE,
+		// });
 	});
 });
 

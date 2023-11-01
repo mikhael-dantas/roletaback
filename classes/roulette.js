@@ -11,7 +11,8 @@ const arrayTriggersString = require("../const/allTriggersString");
 const gatilhosRaceTrackString = require("../const/gatilhosRaceTrackString");
 
 class Roulette {
-  constructor() {
+  constructor(j) {
+    this.jogador = j;
     this.ultimoRegistro;
     this.arrayRequisicao = [];
     this.arrayBanco = [];
@@ -32,7 +33,7 @@ class Roulette {
     await database.sync();
 
     let allTriggers = await database.query(
-      `SELECT * FROM game7x0b order by id desc`,
+      `SELECT * FROM game7x0b where jogador=${this.jogador} order by id desc`,
       { type: QueryTypes.SELECT }
     );
 
@@ -62,7 +63,7 @@ class Roulette {
     await database.sync();
 
     let allTriggers = await database.query(
-      `SELECT * FROM game7x0b order by id desc`,
+      `SELECT * FROM game7x0b WHERE jogador=${this.jogador} order by id desc`,
       { type: QueryTypes.SELECT }
     );
 
@@ -92,7 +93,7 @@ class Roulette {
     await database.sync();
 
     let allTriggers = await database.query(
-      `SELECT * FROM game7x0b order by id desc`,
+      `SELECT * FROM game7x0b HERE jogador=${this.jogador} order by id desc`,
       { type: QueryTypes.SELECT }
     );
 
@@ -122,7 +123,7 @@ class Roulette {
     await database.sync();
 
     let allTriggers = await database.query(
-      `SELECT * FROM game7x0b order by id desc`,
+      `SELECT * FROM game7x0b WHERE jogador=${this.jogador} order by id desc `,
       { type: QueryTypes.SELECT }
     );
 
@@ -152,7 +153,7 @@ class Roulette {
     await database.sync();
 
     let allTriggers = await database.query(
-      `SELECT * FROM game7x0b order by id desc`,
+      `SELECT * FROM game7x0b WHERE jogador=${this.jogador} order by id desc`,
       { type: QueryTypes.SELECT }
     );
 
@@ -276,13 +277,14 @@ class Roulette {
   }
 
   async resetarRoleta() {
-    await database.query("DELETE FROM game7x0b WHERE number!=''", {
+    await database.query(`DELETE FROM game7x0b WHERE number!='' AND jogador=${this.jogador}`, {
       type: QueryTypes.DELETE,
     });
   }
 
   async inserirNumeroNoBanco(e) {
     await Game7x0b.create({
+      jogador: this.jogador,
       number: e,
     });
   }
@@ -293,7 +295,7 @@ class Roulette {
     await database.sync();
 
     this.infoBanco = await database.query(
-      `SELECT * FROM game7x0b LIMIT ${this.numbers.length}`,
+      `SELECT * FROM game7x0b WHERE jogador=${this.jogador} LIMIT ${this.numbers.length}`,
       { type: QueryTypes.SELECT }
     );
 
@@ -324,13 +326,13 @@ class Roulette {
       }
 
       let qtdGat = await database.query(
-        `SELECT COUNT('number') as number FROM game7x0b WHERE number=${gatilho}`,
+        `SELECT COUNT('number') as number FROM game7x0b WHERE number=${gatilho} AND jogador=${this.jogador}`,
         { type: QueryTypes.SELECT }
       );
 
       if (qtdGat[0].number > 1) {
         let saidas = await database.query(
-          `SELECT * FROM game7x0b WHERE number=${gatilho} order by id desc LIMIT 4`,
+          `SELECT * FROM game7x0b WHERE number=${gatilho} AND jogador=${this.jogador} order by id desc LIMIT 4`,
           { type: QueryTypes.SELECT }
         );
 
@@ -345,7 +347,7 @@ class Roulette {
       }
     }
 
-    io.sockets.emit("pay-trigger", resultado);
+    io.sockets.emit("pay-trigger", resultado, this.jogador);
   }
 
   async getPayTriggerString(gatilho, io) {
@@ -360,13 +362,13 @@ class Roulette {
       }
 
       let qtdGat = await database.query(
-        `SELECT COUNT('number') as number FROM game7x0b WHERE number="${gatilho}"`,
+        `SELECT COUNT('number') as number FROM game7x0b WHERE number="${gatilho}" AND jogador=${this.jogador}`,
         { type: QueryTypes.SELECT }
       );
 
       if (qtdGat[0].number > 1) {
         let saidas = await database.query(
-          `SELECT * FROM game7x0b WHERE number="${gatilho}" order by id desc LIMIT 4`,
+          `SELECT * FROM game7x0b WHERE number="${gatilho}" AND jogador=${this.jogador} order by id desc LIMIT 4`,
           { type: QueryTypes.SELECT }
         );
 
@@ -381,7 +383,7 @@ class Roulette {
       }
     }
 
-    io.sockets.emit("pay-trigger", resultado);
+    io.sockets.emit("pay-trigger", resultado, this.jogador);
   }
 
   async verifyPagoString(laterais, saidas, gatilho, qtd) {
@@ -390,7 +392,7 @@ class Roulette {
     for (const [index, item] of saidas.entries()) {
       for (const value of [1, 2, 3, 4, 5, 6, 7, 8]) {
         let superior = await database.query(
-          `SELECT id,number FROM game7x0b WHERE id=${item.id + value}`,
+          `SELECT id,number FROM game7x0b WHERE id=${item.id + value} AND jogador=${this.jogador}`,
           { type: QueryTypes.SELECT }
         );
 
@@ -438,7 +440,7 @@ class Roulette {
     for (const [index, item] of saidas.entries()) {
       for (const value of [1, 2, 3, 4, 5, 6, 7, 8]) {
         let superior = await database.query(
-          `SELECT id,number FROM game7x0b WHERE id=${item.id + value}`,
+          `SELECT id,number FROM game7x0b WHERE id=${item.id + value} AND jogador=${this.jogador}`,
           { type: QueryTypes.SELECT }
         );
 

@@ -15,13 +15,34 @@ module.exports = async (app) => {
         return res.send({ req: arrayRequisicao, banco: arrayBanco })
     });
 
-    app.get("/api/immersive-roulette", async (req, res) => {
+    // app.get("api/resetx", async (req, res) => {
 
+    // });
+    
+    // Exemplo de uso:
+    // addJogadorColumnToGame7x0b(databaseInstance);
+    
+    
+    app.get("/api/immersive-roulette", async (req, res) => {
+        // try {
+        //     // add column 'jogador' to table game7x0b
+        //     await database.query("ALTER TABLE game7x0b ADD COLUMN jogador INT", { type: QueryTypes.RAW });
+        //     console.log("Coluna 'jogador' adicionada com sucesso à tabela game7x0b!");
+    
+        //     // add column 'jogador' to table config_users
+        //     await database.query("ALTER TABLE config_users ADD COLUMN jogador INT", { type: QueryTypes.RAW });
+        //     console.log("Coluna 'jogador' adicionada com sucesso à tabela config_users!");
+        // } catch (error) {
+        //     console.error("Erro ao adicionar a coluna 'jogador' à tabela game7x0b:", error);
+        // }
+        console.log("chamou números");
         let ultimosNumeros = null
 
         try {
 
             ultimosNumeros = await database.query("SELECT * FROM game7x0b LIMIT 5", { type: QueryTypes.SELECT });
+            users = await Users.findAll()
+            console.log("users: ", users)
 
         } catch (error) {
 
@@ -33,20 +54,26 @@ module.exports = async (app) => {
     });
 
     app.post("/api/login", async (req, res) => {
+        console.log("loginnnnnnnnnnnnnnnnnnnnnnnnnn")
+        console.log("email: ", req.body.email)
+        console.log("senha: ", req.body.password)
         try {
             const user = await Users.findOne({
                 where: {
                     email: req.body.email
                 }
             });
-    
+            
             if (user) {
                 if (bcrypt.compareSync(req.body.password, user.password)) {
+                    console.log("loginnnnnnnnnnnnnnnnnnnnnnnnnn sucesso")
                     return res.json({ isLogged: true, user: user });
                 } else {
+                    console.log("senha inválida")
                     return res.json({ isLogged: false, reason: "Senha inválida" });
                 }
             } else {
+                console.log("Usuário não encontrado")
                 return res.error({ isLogged: false, reason: "Usuário não encontrado" });
             }
         } catch (error) {

@@ -12,6 +12,10 @@ const Game7x0b = database.define('game7x0b', {
         type: Sequelize.STRING,
         allowNull: false,
     },
+    jogador: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+    },
 
 }, {
     freezeTableName: true,

@@ -16,6 +16,10 @@ const Config_users = database.define('config_users', {
         type: Sequelize.INTEGER,
         allowNull: false,
     },
+    jogador: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+    },
 }, {
     freezeTableName: true,
     timestamps: true
